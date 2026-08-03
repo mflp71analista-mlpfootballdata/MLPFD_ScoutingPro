@@ -1,6 +1,4 @@
 streamlit
 pandas
 numpy
-matplotlib.pyplot
-sklearn.preprocessing
-sklearn.metrics.pairwise
+scikit-learn
