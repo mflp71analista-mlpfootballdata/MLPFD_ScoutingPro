@@ -82,7 +82,7 @@ Acc_Ofensivas = ['Acciones de ataque exitosas/90','Aceleraciones/90','Asistencia
                 'Centros desde la banda izquierda/90','Centros/90','Duelos atacantes ganados %',
                 'Duelos atacantes/90','Faltas recibidas/90','Goles','Goles (excepto los penaltis)',
                 'Goles de cabeza','Goles de cabeza/90','Goles hechos %','Goles, excepto los penaltis/90',
-                'Goles/90','Pases largos recibidos/90','Pases recibidos /90','Precisión centros %',
+                'Goles/90','Pases largos recibidos/90','Pases recibidos/90','Precisión centros %',
                 'Precisión centros desde la banda derecha %','Precisión centros desde la banda izquierda %',
                 'Regates realizados %','Regates/90','Remates','Remates/90','Tiros a la portería %',
                 'Toques en el área de penalti/90','xG','xG/90']
@@ -117,20 +117,34 @@ Portero = ['Acciones defensivas realizadas/90','Duelos aéreos/90',
           'Precision pases hacia atrás %','Precisión pases largos %','Precisión pases laterales %',
           'Remates en contra','Remates en contra/90','Salidas/90','xG en contra','xG en contra/90']
 
-Finalización = ['Goles', 'Goles (excepto los penaltis)', 'Goles de cabeza', 'Goles de cabeza/90',
+Finalizacion = ['Goles', 'Goles (excepto los penaltis)', 'Goles de cabeza', 'Goles de cabeza/90',
                 'Goles hechos %', 'Goles, excepto los penaltis/90', 'Goles/90', 'Remates', 'Remates/90',
                 'Tiros a la portería %', 'xG/90']
 
-Delantero = ['Goles', 'Goles/90', 'Duelos atacantes ganados %', 'Duelos aéreos ganados %',
-             'Remates/90', 'Regates/90', 'Toques en el área de penalti/90', 'Tiros a la portería %',
-             'xG/90', 'xA/90', 'Regates realizados %']
+#Delantero = ['Goles', 'Goles/90', 'Duelos atacantes ganados %', 'Duelos aéreos ganados %',
+#             'Remates/90', 'Regates/90', 'Toques en el área de penalti/90', 'Tiros a la portería %',
+#             'xG/90', 'xA/90', 'Regates realizados %']
 
-Extremo = ['Regates realizados %', 'Centros desde la banda izquierda/90', 'Centros desde la banda derecha/90',
-           'Precisión centros desde la banda derecha %','Precisión centros desde la banda izquierda %',
-           'Duelos atacantes ganados %', 'Goles', 'xG/90', 'Aceleraciones/90']
+#Extremo = ['Regates realizados %', 'Centros desde la banda izquierda/90', 'Centros desde la banda derecha/90',
+#           'Precisión centros desde la banda derecha %','Precisión centros desde la banda izquierda %',
+#           'Duelos atacantes ganados %', 'Goles', 'xG/90', 'Aceleraciones/90']
 
-lista_metricas = ["Todas", "Fase_Defensiva", "ABP", "Acc_Ofensivas", "Jugadas_Clave", "Organizacion", "Portero", "Finalización",
-                  "Delantero", "Extremo"]
+col_principales = ["Jugador", "Equipo", "Posición específica", "Edad", "Valor de mercado (Transfermarkt)", "Vencimiento contrato",
+                   "Partidos jugados", "Minutos jugados"]
+
+# Mapa de metricas
+mapa_metricas = {
+    "Todas": metricas,
+    #"Delantero": Delantero,
+    #"Extremo": Extremo,
+    "Fase Defensiva": Fase_Defensiva,  
+    "Acciones Ofensivas": Acc_Ofensivas,  
+    "Organizacion": Organizacion,
+    "Jugadas Clave": Jugadas_Clave,
+    "Finalización": Finalizacion,
+    "ABP": ABP,                        
+    "Portero": Portero
+    }
 
 # MENÚ LATERAL
 with st.sidebar:
@@ -155,11 +169,20 @@ with st.sidebar:
     #Posición principal, me quedo con la primera
     pos_ppal_modelo = df_modelo['Posición específica'].str.split(',').str[0].item()
 
+    # Perfiles de MÉTRICAS
+    perfil_metrica = list(mapa_metricas.keys())
+
+    opcion_elegida = st.selectbox(
+                            label = "Selecciona perfil de métricas:",
+                            options = perfil_metrica)
+    
+    metricas_perfil = mapa_metricas[opcion_elegida]
+    
     # Filtrar el DataFrame para quedarnos solo con las métricas seleccionadas
-    X = df[metricas]
+    X = df[metricas_perfil]
 
     # Calcular el promedio de las métricas para el jugador modelo a través de las temporadas
-    media_modelo = df_modelo[metricas].mean().values.reshape(1, -1)
+    media_modelo = df_modelo[metricas_perfil].mean().values.reshape(1, -1)
 
     # Normalizar las métricas del DataFrame Modelo
     scaler = StandardScaler()
@@ -177,9 +200,11 @@ with st.sidebar:
     #quitar duplicados
     df_similares.drop_duplicates(inplace=True)
 
+    # AQUI FALTA UNIR LAS DOS VARIABLES DE LAS COLUMNAS Y MOSTRAR ESAS COLUMNAS
+    col_deseadas = col_principales + metricas_perfil + ['Similitud']
+
     st.divider()
     st.caption("Datos Wyscout")
-
 
 # APLICAR FILTROS para obtener los datos del jugador modelo
 df_modelo= df.copy()
@@ -190,26 +215,10 @@ if temp != None:
 if jugador_modelo != None:
     df_modelo = df_modelo[df_modelo['Jugador'] == jugador_modelo]
 
-#if df_modelo.empty:
-#    st.warning("⚠️ Ningún jugador modelo seleccionado.")
-#    st.stop()
-
-# TABULACIÓN --------------------------------------------------------------------------------------------------
-
-#tab1, tab2 = st.tabs(["🔍 Búsqueda Jugadores similares", " Predicción"])
-
-# TAB 1 - SIMILITUD
-
-#with tab1:
-#st.subheader("Búsqueda jugadores similares")
-
-#st.subheader("Datos Jugador Modelo")
-#st.caption("Datos Jugador Modelo")
 st.markdown("**Datos Jugador Modelo**")
 st.dataframe(df_modelo, width='stretch', hide_index=True)
 
 st.divider()
-#st.caption("Filtros para buscar los Jugadores similares")
 st.markdown(f"**Filtros para buscar los Jugadores similares -** Pos.Específica {pos_ppal_modelo}")
 
 # BÚSQUEDA DE JUGADORES SIMILARES AL JUGADOR MODELO
@@ -225,18 +234,34 @@ with col1:
 
 with col2:
     # slider — minutos mínimos jugados
-    min_minutos = st.slider("Minutos mínimos jugados", 0, int(df['Minutos jugados'].max()), 500, 100)
+    minjug_min = int(df['Minutos jugados'].min())
+    minjug_max = int(df['Minutos jugados'].max())
+    rango_minutos = st.slider(label="Rango Minutos jugados:",
+                                    min_value=minjug_min,
+                                    max_value=minjug_max,
+                                    value=(minjug_min, minjug_max)  )
 
-    df_similares = df_similares[df_similares['Minutos jugados'] >= min_minutos]
+    # Rango_seleccionado ahora guarda una tupla: (min_elegido, max_elegido)
+    min_minjug_elegido, max_minjug_elegido = rango_minutos
 
-#with col3:
-    #st.caption("Posición Específica")
-    #pos = st.selectbox("Posición Específica", pos_ppal_modelo)
-    #st.text_input(label = "Posición Específica", 
-    #            value = pos_ppal_modelo, 
-    #            disabled = True
-    #            )
-    #df_similares = df_similares[df_similares['Posición específica'].str.contains(pos_ppal_modelo)]
+    # Filtrar tu DataFrame existente con los dos extremos seleccionados
+    df_similares = df_similares[df_similares['Minutos jugados'].between(min_minjug_elegido, max_minjug_elegido)]
+
+with col3:
+    # slider — Edad
+    edad_min = int(df['Edad'].min())
+    edad_max = int(df['Edad'].max())
+    rango_edad = st.slider(label="Rango de Edad:",
+                                    min_value=edad_min,
+                                    max_value=edad_max,
+                                    value=(edad_min, edad_max)  
+)
+    # Rango_seleccionado ahora guarda una tupla: (min_elegido, max_elegido)
+    min_edad_elegido, max_edad_elegido = rango_edad
+
+    # Filtrar tu DataFrame existente con los dos extremos seleccionados
+    df_similares = df_similares[df_similares['Edad'].between(min_edad_elegido, max_edad_elegido)]
+
     
 st.divider()
 
@@ -269,10 +294,11 @@ else:
     st.markdown(f"**Nº de jugadores similares: {len(df_similares1)}**")
             
 df_similares1.reset_index(drop=True, inplace=True)
-df_similares1[df_similares1['Jugador'] != jugador_modelo]
+df_similares1 = df_similares1[df_similares1['Jugador'] != jugador_modelo]
 
+df_similares1[col_deseadas]
 
-with col3:
+with col4:
     st.download_button(
         label = "⬇️ Descargar tabla jugadores similares (CSV)",
         data = df_similares1.to_csv(index = False).encode("utf-8"),
@@ -329,7 +355,7 @@ plt.xlim(0, 110.50)
 #        pad=25)  # Espacio entre título y gráfico
 
 # Subtítulo debajo del título (pero arriba del gráfico)
-plt.suptitle(f'Top {top_n} - {liga} - Perfiles similares a {jugador_modelo}',
+plt.suptitle(f'Top {top_n} Perfiles similares a {jugador_modelo} - {liga} - Métricas: {opcion_elegida}',
     fontsize=10,
     color=tit,
     x=0.50,
@@ -358,7 +384,6 @@ for bar in bars:
     plt.text(width + 1.00, bar.get_y() + bar.get_height()/2,
             f'{width:.2f} %', va='center', color = white, fontsize=8)
 
-
 # Ajustar e invertir el eje y
 plt.gca().invert_yaxis()
 
@@ -383,7 +408,3 @@ st.pyplot(plt.gcf())
 # Limpias el lienzo para que no se mezcle con el siguiente gráfico:
 plt.clf()
 
-# TAB2 - PREDICCION --------------------------------------------------------------------------------
-
-#with tab2:
-#    st.write(f"EN CURSO....")
