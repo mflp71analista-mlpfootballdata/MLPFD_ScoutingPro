@@ -15,7 +15,6 @@ LOGO_URL = "https://i.ibb.co/LdPLCmJG/Logo-mlpfootballdata.png"
 
 # CONTENIDO PRINCIPAL 
 st.title("⚽ Scouting Profesional ⚽")
-#st.caption("Datos Wyscout")
 st.divider()
 
 # CACHE FICHERO CSV
@@ -101,7 +100,7 @@ Jugadas_Clave = ['Asistencias','Asistencias/90',
                 'Precisión pases en profundidad %','Precisión pases progresivos %','Second assists/90',
                 'Third assists/90','xA','xA/90']
 
-Organizacion = ['Longitud media pases largos, m','Longitud media pases, m','Pases cortos / medios /90',
+Organizacion = ['Longitud media pases largos, m','Longitud media pases, m','Pases cortos / medios/90',
                 'Pases hacia adelante/90','Pases hacia atrás/90','Pases largos/90','Pases laterales/90',
                 'Pases/90','Precisión pases %','Precisión pases cortos / medios %',
                 'Precisión pases hacia adelante %','Precision pases hacia atrás %','Precisión pases largos %',
@@ -112,7 +111,7 @@ Portero = ['Acciones defensivas realizadas/90','Duelos aéreos/90',
           'Goles evitados/90','Goles recibidos','Goles recibidos/90','Longitud media pases largos, m',
           'Longitud media pases, m','Paradas %','Pases hacia adelante/90',
           'Pases hacía atrás recibidos del arquero/90','Pases hacia atrás/90','Pases largos/90',
-          'Pases laterales/90','Pases/90','Porterías imbatidas en los 90','Precisión pases %',
+          'Pases laterales/90','Pases/90','Porterías imbatidas/90','Precisión pases %',
           'Precisión pases cortos / medios %','Precisión pases hacia adelante %',
           'Precision pases hacia atrás %','Precisión pases largos %','Precisión pases laterales %',
           'Remates en contra','Remates en contra/90','Salidas/90','xG en contra','xG en contra/90']
@@ -204,7 +203,13 @@ with st.sidebar:
     col_deseadas = col_principales + metricas_perfil + ['Similitud']
 
     st.divider()
+    
+    LOGO_URL_OA = "https://objetivoanalista.com/wp-content/uploads/2026/01/logo_horizontal_verde-scaled-251x77.webp"
+    st.caption("Formación:")
+    st.image(LOGO_URL_OA, width='stretch')
+
     st.caption("Datos Wyscout")
+
 
 # APLICAR FILTROS para obtener los datos del jugador modelo
 df_modelo= df.copy()
