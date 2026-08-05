@@ -244,7 +244,8 @@ with col2:
     rango_minutos = st.slider(label="Rango Minutos jugados:",
                                     min_value=minjug_min,
                                     max_value=minjug_max,
-                                    value=(minjug_min, minjug_max)  )
+                                    value=(minjug_min, minjug_max),
+                             step=100)
 
     # Rango_seleccionado ahora guarda una tupla: (min_elegido, max_elegido)
     min_minjug_elegido, max_minjug_elegido = rango_minutos
