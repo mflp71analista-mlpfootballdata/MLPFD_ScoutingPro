@@ -1,0 +1,21 @@
+[theme]
+
+# light o dark
+base = 'light'
+
+# primary accent color
+primaryColor = "#11C15B"
+
+# background color of the app
+backgroundColor = "#FFFFFF"
+
+# background color used for most interactive widgets
+secondaryBackgroundColor = "#F0F2F6"
+
+# color used for almost all text
+textColor = "#31333F"
+
+[server]
+
+# Max size, in megabytes, for files uploaded with the file_uploader. Default: 200
+maxUploadSize = 200
