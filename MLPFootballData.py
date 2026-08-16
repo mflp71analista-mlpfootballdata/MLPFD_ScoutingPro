@@ -23,9 +23,9 @@ def load_csv(path: str) -> pd.DataFrame:
     return pd.read_csv(path)
 
 # CACHE FICHERO EXCEL
-@st.cache_data
-def load_excel(path: str) -> pd.DataFrame:
-    return pd.read_excel(path)
+#@st.cache_data
+#def load_excel(path: str) -> pd.DataFrame:
+#    return pd.read_excel(path)
 
 # LIMPIA DE DATOS
 # Carga dataframe y limpia columnas
@@ -34,15 +34,19 @@ df = load_csv('Data/s_Scout_TempActual_Jugadores.csv')
 df.drop(columns=['Unnamed: 0', 'Equipo'], inplace=True)
 df.rename(columns={'Equipo durante el período seleccionado': 'Equipo'}, inplace=True)
 df['Pais-Comp'] = df['Pais_Comp'] + " - " + df['Competición']
+#Posición principal, me quedo con la primera
+df["Pos_Principal"] = df["Posición específica"].str.split(",").str[0]
+df['Jugador-Pos_Principal'] = df['Jugador'] + " - " + df['Pos_Principal']
+
 df = df.fillna(0)
 # Historico
-df2 = load_excel('Data/s_Scout_Historico_Jugadores.xlsx')
-df2.drop(columns=['Unnamed: 0', 'Equipo'], inplace=True)
-df2.rename(columns={'Equipo durante el período seleccionado': 'Equipo'}, inplace=True)
-df2['Pais-Comp'] = df2['Pais_Comp'] + " - " + df2['Competición']
-df2 = df2.fillna(0)
+#df2 = load_excel('Data/s_Scout_Historico_Jugadores.xlsx')
+#df2.drop(columns=['Unnamed: 0', 'Equipo'], inplace=True)
+#df2.rename(columns={'Equipo durante el período seleccionado': 'Equipo'}, inplace=True)
+#df2['Pais-Comp'] = df2['Pais_Comp'] + " - " + df2['Competición']
+#df2 = df2.fillna(0)
 
-df_total = pd.concat([df, df2], ignore_index=True)
+#df_total = pd.concat([df, df2], ignore_index=True)
 
 metricas = ['Acciones de ataque exitosas/90','Acciones defensivas realizadas/90','Aceleraciones/90','Asistencias','Asistencias/90',
         'Ataque en profundidad/90','Carreras en progresión/90','Centros al área pequeña/90','Centros desde el último tercio/90',
@@ -141,7 +145,11 @@ mapa_metricas = {
     "Organizacion": Organizacion,
     "Jugadas Clave": Jugadas_Clave,
     "Finalización": Finalizacion,
-    "ABP": ABP,                        
+    "ABP": ABP
+    }
+
+# Mapa de metricas
+mapa_metricas_GK = {                    
     "Portero": Portero
     }
 
@@ -155,27 +163,41 @@ with st.sidebar:
     temporadas = sorted(df['Temporada'].dropna().unique().tolist())
     temp = st.selectbox("Temporada", temporadas)
 
+    # Elgir entre portero o el resto
+    portero = st.radio("Portero:", ["Sí", "No"])
+
     # selectbox — JUGADOR MODELO
-    jugadores = [""] + sorted(df['Jugador'].dropna().unique().tolist())
+    if portero == "Sí":
+        df = df[df['Pos_Principal'] == "GK"]
+    else:
+        df = df[df['Pos_Principal'] != "GK"]
+
+    jugadores = [""] + sorted(df['Jugador-Pos_Principal'].dropna().unique().tolist())
     jugador_modelo = st.selectbox("Jugador Modelo", jugadores)
 
     if jugador_modelo == "":
         st.warning("⚠️ Ningún jugador modelo seleccionado.")
         st.stop()
 
-    df_modelo = df[df['Jugador'] == jugador_modelo]
+    df_modelo = df[df['Jugador-Pos_Principal'] == jugador_modelo]
 
     #Posición principal, me quedo con la primera
-    pos_ppal_modelo = df_modelo['Posición específica'].str.split(',').str[0].item()
+    pos_ppal_modelo = df_modelo['Pos_Principal'].iloc[0]
 
     # Perfiles de MÉTRICAS
-    perfil_metrica = list(mapa_metricas.keys())
+    if portero == "Sí":
+        perfil_metrica = list(mapa_metricas_GK.keys())
+    else:
+        perfil_metrica = list(mapa_metricas.keys())
 
     opcion_elegida = st.selectbox(
                             label = "Selecciona perfil de métricas:",
                             options = perfil_metrica)
-    
-    metricas_perfil = mapa_metricas[opcion_elegida]
+
+    if portero == "Sí":
+        metricas_perfil = mapa_metricas_GK[opcion_elegida]
+    else:
+        metricas_perfil = mapa_metricas[opcion_elegida]
     
     # Filtrar el DataFrame para quedarnos solo con las métricas seleccionadas
     X = df[metricas_perfil]
@@ -203,10 +225,6 @@ with st.sidebar:
     col_deseadas = col_principales + metricas_perfil + ['Similitud']
 
     st.divider()
-    
-    LOGO_URL_OA = "https://objetivoanalista.com/wp-content/uploads/2026/01/logo_horizontal_verde-scaled-251x77.webp"
-    st.caption("Formación:")
-    st.image(LOGO_URL_OA, width='stretch')
 
     st.caption("Datos Wyscout")
 
@@ -218,8 +236,9 @@ if temp != None:
     df_modelo = df_modelo[df_modelo['Temporada'] == temp]
 
 if jugador_modelo != None:
-    df_modelo = df_modelo[df_modelo['Jugador'] == jugador_modelo]
+    df_modelo = df_modelo[df_modelo['Jugador-Pos_Principal'] == jugador_modelo]
 
+df_modelo.drop(columns=['Jugador-Pos_Principal'], inplace=True)
 st.markdown("**Datos Jugador Modelo**")
 st.dataframe(df_modelo, width='stretch', hide_index=True)
 
@@ -244,8 +263,8 @@ with col2:
     rango_minutos = st.slider(label="Rango Minutos jugados:",
                                     min_value=minjug_min,
                                     max_value=minjug_max,
-                                    value=(minjug_min, minjug_max),
-                             step=100)
+                                    value=(minjug_min, minjug_max,),
+                                    step=100  )
 
     # Rango_seleccionado ahora guarda una tupla: (min_elegido, max_elegido)
     min_minjug_elegido, max_minjug_elegido = rango_minutos
@@ -268,7 +287,6 @@ with col3:
     # Filtrar tu DataFrame existente con los dos extremos seleccionados
     df_similares = df_similares[df_similares['Edad'].between(min_edad_elegido, max_edad_elegido)]
 
-    
 st.divider()
 
 # Añadir filtros fijos TEMPORADA, SIMILITUD y POS. ESPECÍFICA
@@ -300,8 +318,11 @@ else:
     st.markdown(f"**Nº de jugadores similares: {len(df_similares1)}**")
             
 df_similares1.reset_index(drop=True, inplace=True)
-df_similares1 = df_similares1[df_similares1['Jugador'] != jugador_modelo]
+df_similares1 = df_similares1[df_similares1['Jugador-Pos_Principal'] != jugador_modelo]
 
+#df_similares1[col_deseadas]
+#st.dataframe(df_similares1[col_deseadas], width='stretch', hide_index=True)
+df_similares1.index = range(1, len(df_similares1) + 1)
 df_similares1[col_deseadas]
 
 with col4:
@@ -327,7 +348,7 @@ white = "#ffffff"
 # Crear un gráfico de barras para los 10 jugadores más similares
 top_n = 10
 
-df_top_similares1 = df_similares1[df_similares1['Jugador'] != jugador_modelo].head(top_n)
+df_top_similares1 = df_similares1[df_similares1['Jugador-Pos_Principal'] != jugador_modelo].head(top_n)
 
 # Crear un nuevo campo en el DataFrame con el nombre completo para la etiqueta en el gráfico
 df_top_similares1['jugador_equipo'] = df_top_similares1['Jugador'] + ' (' + df_top_similares1['Equipo'] + ')'
