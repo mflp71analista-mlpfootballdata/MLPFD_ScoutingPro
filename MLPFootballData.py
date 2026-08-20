@@ -339,10 +339,15 @@ st.divider()
 # GRAFICO CON EL TOP 10 ----------------------------------------------------------------------
 
 # ESTILO
-bg = "#2d3137" #fondo
+bg = "#899BA0" #fondo 2d3137
 tit = "#f4cf7f" #amarillo crema resto
-key = "#c1ff72" #verde lima num2-3
-impact = "#ef233c" #rojo num1
+key = "#c1ff72" #verde lima s
+
+#ranking jugadores
+impact = "#ef233c" #rojo num 1
+seg_ter = "#c1ff72" #verde lima num2-3
+resto = "#FFF7B1" #resto hasta el 10 
+
 white = "#ffffff"
 
 # Crear un gráfico de barras para los 10 jugadores más similares
@@ -391,21 +396,21 @@ plt.suptitle(f'Top {top_n} Perfiles similares a {jugador_modelo} - {liga} - Mét
 )
 
 # Texto en la esquina superior derecha (datos)
-#plt.text(
-#    1.0,
-#    1.023,
-#    "Datos Wyscout",
-#    ha="right", va="bottom", transform=plt.gca().transAxes, fontsize=9, color="gray"
-#    )
+plt.text(
+    1.0,
+    1.023,
+    "Datos Wyscout",
+    ha="right", va="bottom", transform=plt.gca().transAxes, fontsize=9, color="black"
+   )
 
 #FIRMA
-plt.figtext(0.99, 0.01, "Hecho por @ManuelFLP", ha="right", fontsize=9, color="gray")
+plt.figtext(0.99, 0.01, "Hecho por @ManuelFLP", ha="right", fontsize=9, color="black")
 #marca de agua
 plt.text(0.5, 0.5, "Hecho por @ManuelFLP",
-    transform=plt.gca().transAxes, fontsize=30, color="gray",
+    transform=plt.gca().transAxes, fontsize=30, color="grey",
     alpha=0.2, ha="center", va="center", rotation=30)
 
-bars = plt.barh(df_top_similares1["jugador_equipo"], df_top_similares1["Similitud"], color=tit)
+bars = plt.barh(df_top_similares1["jugador_equipo"], df_top_similares1["Similitud"], color=resto)
 for bar in bars:
     width = bar.get_width()
     plt.text(width + 1.00, bar.get_y() + bar.get_height()/2,
@@ -425,7 +430,7 @@ for i, b in enumerate(bars):
     if i == 0:
         b.set_color(impact)
     elif i < 3:
-        b.set_color(key)
+        b.set_color(seg_ter)
 
 plt.tight_layout()
 #plt.show()
