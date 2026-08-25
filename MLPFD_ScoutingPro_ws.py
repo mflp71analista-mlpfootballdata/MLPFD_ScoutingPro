@@ -11,6 +11,14 @@ from io import BytesIO, StringIO
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics.pairwise import cosine_similarity
 
+# Ocultar la barra superior (menú, icono de GitHub y herramientas)
+hide_streamlit_style = """
+    <style>
+    header {visibility: hidden;}
+    </style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 # desactiva la descarga de datos directamente del dataframe
 st.markdown(
     """
