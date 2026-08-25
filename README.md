@@ -18,11 +18,11 @@
 ## 🚀 Funcionalidades Principales
 
 ### 1. Selección y Ficha del Jugador Modelo
-* Permite seleccionar la temporada de análisis y el jugador de referencia (ej. *Nico Williams - Athletic Club*).
+* Permite seleccionar la temporada de análisis, seleccionar si es portero o no, jugador de referencia, una de las posibles posiciones del jugador modelo y el grupo de métricas a analizar.
 * Genera una ficha técnica inmediata con datos de filiación (edad, posición específica, valor de mercado, vencimiento de contrato, pie, altura, peso) y sus métricas avanzadas por 90 minutos (xG, xA, duelos ganados, entradas, pases progresivos, etc.).
 
 ### 2. Algoritmo de Similitud y Filtrado Dinámico
-* **Segmentación por Posición Específica:** Ajuste automático de la muestra según la demarcación del jugador objetivo (ej. *LAMF - Extremo Izquierdo*).
+* **Segmentación por Posición Específica:** Ajuste automático de la muestra según la demarcación seleccionada del jugador objetivo.
 * **Filtros de Mercado:**
   * **País / Liga:** Filtrado por competiciones de destino (ej. *1ª RFEF, LaLiga, etc.*).
   * **Rango de Minutos Jugados:** Control continuo mediante *sliders* para evitar distorsiones por muestras pequeñas.
@@ -31,7 +31,11 @@
 
 ### 3. Resultados & Salida de Datos
 * **Tabla de Resultados Exportable:** Desglose métrico completo con el número exacto de jugadores coincidentes encontrados. Incluye funcionalidad directa para **descargar la tabla en CSV**.
-* **Ranking de Similaridad (Top 10):** Visualización mediante barras con el porcentaje exacto de coincidencia estadística respecto al *Jugador Modelo* (ej. *A. Ramírez - Juventud Torremolinos: 83.11%*).
+* **Ranking de Similitud (Top 10):** Visualización mediante barras con el porcentaje exacto de coincidencia estadística respecto al *Jugador Modelo*.
+
+### 4. Detalles jugador
+* **Detalles del jugador:** Listado de todas sus métricas correspondientes al grupo seleccionado**.
+* **RadarChart:** Visualización mediante radar chart de los datos de las métricas previamente pasadas todas a percentiles para poder medir las /90 y los porcentajes.
 
 ---
 
