@@ -1,4 +1,4 @@
-# ⚽ MLPScoutingPro: Scouting Profesional & Jugadores Similares
+# ⚽ MLPScoutingPro: Scouting Profesional 
 
 **MLP Scouting Pro** es una aplicación web interactiva desarrollada en **Python** y **Streamlit** orientada a la identificación y análisis comparativo de futbolistas. La herramienta permite a directores deportivos, analistas y secretarías técnicas encontrar sustitutos o perfiles similares a un **Jugador Modelo** de referencia, aplicando algoritmos de distancia e índice de coincidencia estadística sobre métricas ajustadas por 90 minutos.
 
