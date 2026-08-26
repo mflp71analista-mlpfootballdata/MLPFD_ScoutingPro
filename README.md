@@ -11,7 +11,7 @@
 * **Procesamiento de Datos:** Pandas, NumPy
 * **Métricas Estadísticas & Algoritmos:** Scikit-Learn (Estandarización, métricas de similitud y distancia)
 * **Visualización de Datos:** Matplotlib, Seaborn
-* **Data Sources:** Datos avanzados de rendimiento técnico-táctico (Wyscout / FBref)
+* **Data Sources:** Datos avanzados de rendimiento técnico-táctico (Wyscout)
 
 ---
 
