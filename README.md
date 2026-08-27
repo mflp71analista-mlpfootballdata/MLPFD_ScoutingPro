@@ -35,7 +35,7 @@
 
 ### 4. Detalles jugador
 * **Detalles del jugador:** Listado de todas sus métricas correspondientes al grupo seleccionado**.
-* **RadarChart:** Visualización mediante radar chart de los datos de las métricas previamente pasadas todas a percentiles para poder medir las /90 y los porcentajes.
+* **RadarChart:** Visualización mediante radar chart de los datos de las métricas previamente pasadas todas a percentiles para poder medir las /90 y los porcentajes y comparación con el jugador modelo.
 
 ---
 
