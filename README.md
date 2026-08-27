@@ -44,4 +44,4 @@
 1. **Búsqueda de Sustitutos Directos (Replacement Search):** Identificación de reemplazos de garantías ante salidas imprevistas, detectando rendimiento equivalente en ligas de menor presupuesto (ej. captar perfiles de rendimiento élite en 1ª RFEF).
 2. **Mitigación del Riesgo en Fichajes:** Evaluación basada en datos objetivos y métricas *per 90* normalizadas, reduciendo el sesgo en el scouting visual.
 3. **Scouting de Proyección:** Filtrado combinado por edad y minutos para detectar talentos jóvenes con métricas similares a futbolistas consolidados.
-4. **Url App:** Abre el fichero Url_App y dentro está la url de la app. Si quieres probarla ponte en contacto conmigo al email: mflp71.analista@gmail.com
+4. **Url App:** Abre el fichero Url_App y dentro está la url de la app. Si quieres probarla ponte en contacto conmigo al email: mflp71.analista@gmail.com o por privado por Linkedin.
