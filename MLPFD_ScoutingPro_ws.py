@@ -7,6 +7,9 @@ import time
 import matplotlib.pyplot as plt
 from azure.storage.blob import BlobServiceClient
 from io import BytesIO, StringIO
+from PIL import Image
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+import requests
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics.pairwise import cosine_similarity
@@ -18,6 +21,31 @@ hide_streamlit_style = """
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+# funcion para ajustar imagenes
+def add_image_from_url(url, x_pos, y_pos, size, relative_to):
+    """
+    Añade una imagen a un gráfico desde una URL.
+
+    Parámetros:
+    - url: Link de la imagen.
+    - x_pos, y_pos: Posición en el gráfico.
+    - size: Tamaño (zoom) de la imagen (ej: 0.1).
+    - relative_to: 
+        * 'data': Usa los números de los ejes (ej: Goles).
+        * 'axes': Usa el área del gráfico (0 a 1).
+        * 'figure': Usa toda la imagen final (0 a 1).
+    """
+    # Descarga y procesa la imagen
+    response = requests.get(url, timeout=5)
+    img = Image.open(BytesIO(response.content)).convert('RGBA')
+    
+    # Define el sistema de coordenadas
+    coord_style = relative_to if relative_to == 'data' else f'{relative_to} fraction'
+    
+    # Crea y añade la imagen al gráfico
+    imagebox = OffsetImage(img, zoom=size)
+    ax.add_artist(AnnotationBbox(imagebox, (x_pos, y_pos), xycoords=coord_style, frameon=False))
 
 # desactiva la descarga de datos directamente del dataframe
 st.markdown(
@@ -131,6 +159,8 @@ with st.sidebar:
     # selectbox — JUGADOR MODELO
     jugadores = [""] + sorted(df['Jugador-Posiciones'].dropna().unique().tolist())
     jugador_modelo = st.selectbox("Jugador Modelo", jugadores)
+
+    st.session_state["jugador_modelo"] = jugador_modelo
 
     if jugador_modelo == "":
         st.warning("⚠️ Ningún jugador modelo seleccionado.")
@@ -476,6 +506,22 @@ with tab1:
 # ══════════════════════════════════════════════════════
 
 with tab2: 
+    # Leer escudos
+    # LEER METRICAS
+    ACCOUNT_NAME = 'mlpfd' # cuenta azure mlpfd
+    ACCOUNT_KEY = correct_key
+    CONTAINER_NAME = 'escudos' # nombre DEL CONTENEDPROR
+
+    # SET UP
+    blob_service_client = BlobServiceClient(account_url=f"https://{ACCOUNT_NAME}.blob.core.windows.net",credential=ACCOUNT_KEY)
+    container_client = blob_service_client.get_container_client(CONTAINER_NAME)
+
+
+    BLOB_NAME_METRICAS = 'Escudos_Futbol.xlsx'
+    blob_client = container_client.get_blob_client(BLOB_NAME_METRICAS)
+    data = blob_client.download_blob().readall()
+    df_escudos = load_excel(BytesIO(data))
+
     #st.subheader("Ficha Técnica y Análisis Individual")
 
     # 1. Comprobamos si hay un jugador seleccionado en la memoria de sesión
@@ -485,35 +531,41 @@ with tab2:
         ):
             jugador_activo = st.session_state["jugador_seleccionado"]
 
-            st.markdown(f"##### 👤 Analizando a: **{jugador_activo} - {st.session_state["pos_seleccionado"]}**")
-            #st.session_state["metricas"] = grupo_rol_sel
-            st.caption(f"Grupo de métricas - {st.session_state["metricas"]}")
+            st.markdown(f"##### 👤 Analizando a: **{jugador_activo}**")
 
             # 2. Filtramos el DataFrame general para extraer los datos de este jugador
-            # (Asegúrate de cambiar 'df_completo' por el nombre real de tu dataframe principal con todos los jugadores)
             df_ficha = df_similares1[df_similares1["Jugador"] == jugador_activo]
 
             if not df_ficha.empty:
                 # Mostramos sus datos tabulares de forma limpia
-                st.dataframe(df_ficha[col_deseadas], width = 'stretch', hide_index=True)
+                col_principales.append("Similitud")
+                st.dataframe(df_ficha[col_principales], width = 'stretch', hide_index=True)
+                equipo_analisis = df_ficha.iloc[0]["Equipo"] 
+
+                equipo_modelo = df_modelo.iloc[0]["Equipo"] 
+                jug_modelo = df_modelo.iloc[0]["Jugador"] 
+
+                logo_team1 = df_escudos.loc[df_escudos['Equipo'].str.contains(equipo_analisis, case=False, na=False), 'Escudo'].values[0]
+                logo_team2 = df_escudos.loc[df_escudos['Equipo'].str.contains(equipo_modelo, case=False, na=False), 'Escudo'].values[0]
 
                 st.markdown("---")
-                st.markdown("##### 🎯 Gráfico Radar de Rendimiento")
+                st.markdown(f"##### 🎯 Gráfico Radar de Rendimiento - Gr. Métricas: {grupo_rol_sel} - Pos. Específica: {st.session_state["pos_seleccionado"]}")
 
                 # Rankear todas las columnas en 'params' (percentil, mejor valor = rank más alto)
                 col_metricas = st.session_state["metricas_perfil"] 
                 df_similares[col_metricas] = df_similares[col_metricas].rank(pct=True, ascending=True) * 100
 
                 player1_values = df_similares.loc[df_similares['Jugador'] == st.session_state["jugador_seleccionado"], col_metricas].values.flatten().tolist()
-
-                title = st.session_state["jugador_seleccionado"] + " - " + st.session_state["pos_seleccionado"] + f" - {grupo_rol_sel}"
+                player2_values = df_similares.loc[df_similares['Jugador'] == jug_modelo, col_metricas].values.flatten().tolist()
+                
+                title = st.session_state["jugador_seleccionado"] #+ " - " + st.session_state["pos_seleccionado"] 
  
-                player1_color = "#c1ff72" #verde lima s # df_similares.loc[df_similares['player_name'] == st.session_state["jugador_seleccionado"], 'Team_Color'].values[0]
-                #player2_color = df_similares.loc[df_similares['player_name'] == player2, 'Team_Color'].values[0]
+                player1_color = "#01fc0e" # df_similares.loc[df_similares['player_name'] == st.session_state["jugador_seleccionado"], 'Team_Color'].values[0]
+                player2_color = "#2a06f7" # df_similares.loc[df_similares['player_name'] == player2, 'Team_Color'].values[0]
 
                 title_color = '#00171f'
                 fig_bg_color = "#899BA0" #fondo 2d3137
-                radar_bg_color = '#f8f9fa'
+                radar_bg_color = "#0c0c0c"
 
                 # Etiquetas del radar (usamos los parámetros como etiquetas)
                 labels = col_metricas
@@ -527,36 +579,35 @@ with tab2:
 
                 # Cerrar los polígonos
                 player1_values += [player1_values[0]]
-                #player2_values += [player2_values[0]]
+                player2_values += [player2_values[0]]
 
                 # Crear figura
                 fig, ax = plt.subplots(figsize=(8, 8), dpi=110, subplot_kw=dict(polar=True))
 
                 # Texto personalizado (jugadores y equipos)
-                ax.text(0.5, 1.15, title, transform=ax.transAxes, ha='center', fontsize=10, color=title_color)
-                #ax.text(0.4, 1.1, f"{st.session_state["jugador_seleccionado"]}", transform=ax.transAxes, ha='right', fontsize=14, color=player1_color)
+                ax.text(0.2, 1.15, title, transform=ax.transAxes, ha='center', fontsize=10, color=player1_color)
+                ax.text(0.9, 1.15, f"{jug_modelo}", transform=ax.transAxes, ha='right', fontsize=10, color=player2_color)
                 #ax.text(0.6, 1.1, f"{player2}", transform=ax.transAxes, ha='left', fontsize=14, color=player2_color,fontproperties=font_title.prop)
-                #ax.text(0.4, 1.07, f"{Team1}", transform=ax.transAxes, ha='right', fontsize=12, color=player1_color,fontproperties=font_title.prop)
-                #ax.text(0.6, 1.07, f"{Team2}", transform=ax.transAxes, ha='left', fontsize=12, color=player2_color,fontproperties=font_title.prop)
+                ax.text(0.2, 1.12, f"{equipo_analisis}", transform=ax.transAxes, ha='right', fontsize=8, color=player1_color)
+                ax.text(0.7, 1.12, f"{equipo_modelo}", transform=ax.transAxes, ha='left', fontsize=8, color=player2_color)
 
-                #add_image_from_url(logo_team1, x_pos=0.45, y_pos=1.1, size=0.2, relative_to='axes')
-                #add_image_from_url(logo_team2, x_pos=0.55, y_pos=1.1, size=0.2, relative_to='axes')
+                add_image_from_url(logo_team1, x_pos=0.07, y_pos=1.16, size=0.07, relative_to='axes')
+                add_image_from_url(logo_team2, x_pos=0.95, y_pos=1.16, size=0.07, relative_to='axes')
 
                 # Dibujar las líneas
                 ax.plot(angles, player1_values, color=player1_color, linewidth=2)
                 ax.fill(angles, player1_values, color=player1_color, alpha=0.4)
 
-                #ax.plot(angles, player2_values, color=player2_color, linewidth=2)
-                #ax.fill(angles, player2_values, color=player2_color, alpha=0.4)
-
+                ax.plot(angles, player2_values, color=player2_color, linewidth=2)
+                ax.fill(angles, player2_values, color=player2_color, alpha=0.4)
 
                 # Añadir los valores numéricos al radar
                 for i in range(num_vars):
                     angle = angles[i]
                     # Jugador 1
-                    ax.text(angle, player1_values[i] + 3, f"{int(player1_values[i])}", color="black", fontsize=10, ha='center', va='center')
+                    ax.text(angle+0.03, player1_values[i] + 3, f"{int(player1_values[i])}", color=player1_color, fontsize=8, ha='center', va='center')
                     # Jugador 2
-                    #ax.text(angle, player2_values[i] + 3, f"{int(player2_values[i])}", color=player2_color, fontsize=10, ha='center', va='center',fontproperties=font_title.prop)
+                    ax.text(angle-0.03, player2_values[i] + 3, f"{int(player2_values[i])}", color=player2_color, fontsize=8, ha='center', va='center')
 
                 # Añadir etiquetas
                 ax.set_xticks(angles[:-1])
